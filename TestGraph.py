@@ -98,6 +98,61 @@ def test_getConnectedComponents():
     return True
 
 
+def test_getUnmarkedConnectedComponents():
+    graph = buildGraph(
+        ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15"],
+        [
+            ("v1", "v2"),
+            ("v1", "v6"),
+            ("v2", "v3"),
+            ("v2", "v7"),
+            ("v3", "v4"),
+            ("v3", "v8"),
+            ("v4", "v5"),
+            ("v4", "v9"),
+            ("v6", "v2"),
+            ("v6", "v7"),
+            ("v6", "v10"),
+            ("v7", "v3"),
+            ("v7", "v8"),
+            ("v7", "v11"),
+            ("v8", "v4"),
+            ("v8", "v9"),
+            ("v8", "v12"),
+            ("v9", "v5"),
+            ("v10", "v7"),
+            ("v10", "v11"),
+            ("v10", "v13"),
+            ("v11", "v8"),
+            ("v11", "v12"),
+            ("v11", "v14"),
+            ("v12", "v9"),
+            ("v13", "v11"),
+            ("v13", "v14"),
+            ("v13", "v15"),
+            ("v14", "v12"),
+            ("v15", "v14")
+        ]
+    )
+
+    graph.getVertexByName("v3").setMarked()
+    graph.getVertexByName("v7").setMarked()
+    graph.getVertexByName("v8").setMarked()
+    graph.getVertexByName("v10").setMarked()
+    graph.getVertexByName("v11").setMarked()
+    graph.getVertexByName("v12").setMarked()
+    graph.getVertexByName("v13").setMarked()
+    graph.getVertexByName("v14").setMarked()
+
+    print([ v.getName() for v in graph.getVertices() ], [ e.getName() for e in graph.getEdges() ])
+
+    components : List[Graph] = graph.getUnmarkedConnectedComponents()
+    for component in components:
+        print('-', [ v.getName() for v in component.getVertices() ], [ e.getName() for e in component.getEdges() ])
+
+    return True
+
+
 def test_getDisk():
     graph = buildGraph(["v1", "v2", "v3", "v4"], [("v1", "v2"), ("v2", "v3"), ("v3", "v4")])
 
@@ -179,5 +234,7 @@ if __name__ == "__main__":
         print("ERROR in copy")
     if not test_getConnectedComponents():
         print("ERROR in getConnectedComponents")
+    if not test_getUnmarkedConnectedComponents():
+        print("ERROR in getUnmarkedConnectedComponents")
     if not test_getDisk():
         print("ERROR in getDisk")

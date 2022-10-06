@@ -107,7 +107,7 @@ class Graph():
         return Graph([ v for v in new_vertices.values() ], new_edges)
 
 
-    def topologicalSearch(self, begining, neighboorhood, action):
+    def topologicalSearch(self, begining : Vertex, neighboorhood, action):
         explored = { v.getName(): False for v in self.getVertices() }
 
         def explore(v : Vertex):
@@ -148,13 +148,42 @@ class Graph():
         components = []
         remaining = [ v.getName() for v in self.getVertices() ]
 
-        def action(v):
+        def action(v : Vertex):
             if v.getName() in remaining:
                 remaining.remove(v.getName())
             components[-1].append(v)
 
-        def neighboorhood(v):
+        def neighboorhood(v : Vertex) -> List[Vertex]:
             return v.getNeighboorVertices()
+
+        while len(remaining) > 0:
+            components.append([])
+            name = remaining[0]
+            self.topologicalSearch(self.getVertexByName(name), neighboorhood, action)
+
+        for component in components:
+            result.append(self.getSubgraph(component))
+
+        return result
+
+
+    def getUnmarkedConnectedComponents(self):
+        result = []
+        components = []
+        remaining = [ v.getName() for v in self.getVertices() if not v.isMarked() ]
+
+        def action(v : Vertex):
+            if v.getName() in remaining:
+                remaining.remove(v.getName())
+            components[-1].append(v)
+
+        def neighboorhood(v : Vertex) -> List[Vertex]:
+            r = (
+                v.getNeighboorVertices()
+                if not v.isMarked()
+                else [ v_ for v_ in v.getNeighboorVertices() if not v_.isMarked() ]
+            )
+            return r
 
         while len(remaining) > 0:
             components.append([])
