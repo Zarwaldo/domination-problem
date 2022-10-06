@@ -4,75 +4,85 @@ from Graph import Graph, buildGraph
 
 
 def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List[str]:
-    def aux(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
-        if len(stack) >= len(result):
-            return
+    def aux(graph : Graph):
+        def aux2(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
+            unmarked_components = graph.getUnmarkedConnectedComponents()
 
-        finished = True
+            if len(unmarked_components) > 1:
+                r = []
 
-        for v in graph.getVertices():
-            if not v.isMarked():
-                finished = False
+                for c in unmarked_components:
+                    r += aux(c)
 
-        if finished:
-            result.clear()
-            for v in stack:
-                result.append(v)
+                if len(r) < len(result):
+                    result.clear()
+                    for v in r:
+                        result.append(v)
 
-        if len(stack) >= len(result) - 1:
-            return
+            if len(stack) >= len(result):
+                return
 
-        lone_vertices = [
-            v.getName()
-            for v in graph.getVertices()
-            if v.getCoveringPotential() == 1
-            and not v.isMarked() 
-        ]
+            finished = True
 
-        remaining = [
-            v
-            for v in (
-                graph.getDisk([ graph.getVertexByName(name) for name in stack ], 3)
-                if len(stack) > 0
-                else graph.getVertices()
-            )
-            if v.getName() not in stack
-            and v not in lone_vertices
-            and v.getCoveringPotential() > 1
-        ]
+            for v in graph.getVertices():
+                if not v.isMarked():
+                    finished = False
 
-        remaining.sort(
-            key = lambda v: -v.getCoveringPotential()
-        )
-
-        for name in [ v.getName() for v in remaining ]:
-            graph_ = graph.copy()
-            vertex = graph_.getVertexByName(name)
-            vertex.cover()
-
-            aux(
-                graph_,
-                stack
-                + [ vertex.getName() ],
-                result,
-                explored_roots
-            )
-
-            if len(stack) == 0:
-                explored_roots[vertex.getName()] = True
+            if finished:
+                result.clear()
+                for v in stack:
+                    result.append(v)
 
             if len(stack) >= len(result) - 1:
                 return
 
+            lone_vertices = [
+                v.getName()
+                for v in graph.getVertices()
+                if v.getCoveringPotential() == 1
+                and not v.isMarked() 
+            ]
+
+            remaining = [
+                v
+                for v in (
+                    graph.getDisk([ graph.getVertexByName(name) for name in stack ], 3)
+                    if len(stack) > 0
+                    else graph.getVertices()
+                )
+                if v.getName() not in stack
+                and v not in lone_vertices
+                and v.getCoveringPotential() > 1
+            ]
+
+            remaining.sort(
+                key = lambda v: -v.getCoveringPotential()
+            )
+
+            for name in [ v.getName() for v in remaining ]:
+                graph_ = graph.copy()
+                vertex = graph_.getVertexByName(name)
+                vertex.cover()
+
+                aux2(
+                    graph_,
+                    stack
+                    + [ vertex.getName() ],
+                    result,
+                    explored_roots
+                )
+
+                if len(stack) == 0:
+                    explored_roots[vertex.getName()] = True
+
+                if len(stack) >= len(result) - 1:
+                    return
+
+
+        dominating : List[str] = [ v.getName() for v in graph.getVertices() ]
+        aux2(graph, [], dominating, { v.getName(): False for v in graph.getVertices() })
+
+        return dominating
 
     graph = buildGraph(vertices, edges)
-    components : List[Graph] = graph.getConnectedComponents()
-
-    result : List[str] = []
-
-    for component in components:
-        dominating : List[str] = [ v.getName() for v in component.getVertices() ]
-        aux(component, [], dominating, { v.getName(): False for v in component.getVertices() })
-        result += dominating
-
-    return result
+    return aux(graph)
