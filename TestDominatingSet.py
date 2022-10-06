@@ -79,7 +79,7 @@ def test_minimalDominatingSet():
         ]
     )
 
-    if sorted(r) != sorted(["v2", "v4", "v5"]):
+    if sorted(r) != sorted(["v2", "v5", "v7"]):
         return False
 
     return True
