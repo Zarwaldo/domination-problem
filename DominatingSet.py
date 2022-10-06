@@ -37,8 +37,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 else graph.getVertices()
             )
             if v.getName() not in stack
-            and not explored_roots[v.getName()]
-            and v.getCoveringPotential() > 1
+            and v not in lone_vertices
         ]
 
         remaining.sort(
@@ -49,10 +48,6 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
             graph_ = graph.copy()
             vertex = graph_.getVertexByName(name)
             vertex.cover()
-
-            for v in graph_.getVertices():
-                if v.getName() in lone_vertices:
-                    v.cover()
 
             aux(
                 graph_,
