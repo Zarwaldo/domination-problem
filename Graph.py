@@ -107,47 +107,62 @@ class Graph():
         return Graph([ v for v in new_vertices.values() ], new_edges)
 
 
-    def getConnectedComponents(self):
-        result = []
-        components = []
+    def topologicalSearch(self, begining, neighboorhood, action):
         explored = { v.getName(): False for v in self.getVertices() }
-        remaining = [ v.getName() for v in self.getVertices() ]
 
         def explore(v : Vertex):
             explored[v.getName()] = True
+            action(v)
+
+            for v_ in neighboorhood(v):
+                if not explored[v_.getName()]:
+                    explore(v_)
+
+        explore(begining)
+
+
+    def getSubgraph(self, vertices : List[Vertex]):
+        edges = [ e for e in self.getEdges() if e.vertex1 in vertices and e.vertex2 in vertices ]
+
+        new_vertices = {}
+        for v in vertices:
+            v_ = Vertex(v.getName())
+            v_.setMarked(v.isMarked())
+            new_vertices[v.getName()] = v_
+
+        new_edges = []
+        for e in edges:
+            new_edges.append(
+                Edge(
+                    e.getName(),
+                    new_vertices[e.vertex1.getName()],
+                    new_vertices[e.vertex2.getName()]
+                )
+            )
+
+        return Graph([ v for v in new_vertices.values() ], new_edges)
+
+
+    def getConnectedComponents(self):
+        result = []
+        components = []
+        remaining = [ v.getName() for v in self.getVertices() ]
+
+        def action(v):
             if v.getName() in remaining:
                 remaining.remove(v.getName())
             components[-1].append(v)
 
-            for v_ in v.getNeighboorVertices():
-                if not explored[v_.getName()]:
-                    explore(v_)
+        def neighboorhood(v):
+            return v.getNeighboorVertices()
 
         while len(remaining) > 0:
             components.append([])
             name = remaining[0]
-            explore(self.getVertexByName(name))
+            self.topologicalSearch(self.getVertexByName(name), neighboorhood, action)
 
         for component in components:
-            edges = [ e for e in self.getEdges() if e.vertex1 in component and e.vertex2 in component ]
-
-            new_vertices = {}
-            for v in component:
-                v_ = Vertex(v.getName())
-                v_.setMarked(v.isMarked())
-                new_vertices[v.getName()] = v_
-
-            new_edges = []
-            for e in edges:
-                new_edges.append(
-                    Edge(
-                        e.getName(),
-                        new_vertices[e.vertex1.getName()],
-                        new_vertices[e.vertex2.getName()]
-                    )
-                )
-
-            result.append(Graph([ v for v in new_vertices.values() ], new_edges))
+            result.append(self.getSubgraph(component))
 
         return result
 
