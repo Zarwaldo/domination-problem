@@ -6,18 +6,21 @@ from Graph import Graph, buildGraph
 def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List[str]:
     def aux(graph : Graph):
         def aux2(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
-            unmarked_components = graph.getUnmarkedConnectedComponents()
+            if len(graph.getVertices()) > 10:
+                unmarked_components = graph.getUnmarkedConnectedComponents()
+                if len(unmarked_components) > 1:
+                    r = stack
 
-            if len(unmarked_components) > 1:
-                r = []
+                    for c in unmarked_components:
+                        if len(r) < len(result):
+                            r += aux(c)
 
-                for c in unmarked_components:
-                    r += aux(c)
+                    if len(r) < len(result):
+                        result.clear()
+                        for v in r:
+                            result.append(v)
 
-                if len(r) < len(result):
-                    result.clear()
-                    for v in r:
-                        result.append(v)
+                    return
 
             if len(stack) >= len(result):
                 return
@@ -36,13 +39,6 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
             if len(stack) >= len(result) - 1:
                 return
 
-            lone_vertices = [
-                v.getName()
-                for v in graph.getVertices()
-                if v.getCoveringPotential() == 1
-                and not v.isMarked() 
-            ]
-
             remaining = [
                 v
                 for v in (
@@ -51,8 +47,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                     else graph.getVertices()
                 )
                 if v.getName() not in stack
-                and v not in lone_vertices
-                and v.getCoveringPotential() > 1
+                and v.getCoveringPotential() >= 1
             ]
 
             remaining.sort(
@@ -66,8 +61,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
                 aux2(
                     graph_,
-                    stack
-                    + [ vertex.getName() ],
+                    stack + [ vertex.getName() ],
                     result,
                     explored_roots
                 )
