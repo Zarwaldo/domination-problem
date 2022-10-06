@@ -4,7 +4,18 @@ from Graph import Graph, buildGraph
 
 
 def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List[str]:
-    def aux(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
+    def stackToInt(graph : Graph, stack : List[str]):
+        r = 0
+
+        names = sorted([ v.getName() for v in graph.getVertices() ])
+        for i in range(len(names)):
+            if names[i] in stack:
+                r += 2**i
+
+        return r
+
+    def aux(graph : Graph, stack : List[str], result : List[str], explored_subsets : List[int]):
+        print(stack, end = '\r')
         if len(stack) >= len(result):
             return
 
@@ -21,6 +32,11 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
         if len(stack) >= len(result) - 1:
             return
+
+        for i in range(2**len(stack)):
+            subset = [ stack[j] for j in range(len(stack) - 1) if i & (2**j) == (2**j) ]
+            if stackToInt(graph, subset) in explored_subsets:
+                return
 
         lone_vertices = [
             v.getName()
@@ -51,15 +67,12 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
             aux(
                 graph_,
-                stack
-                + [ vertex.getName() ]
-                + lone_vertices,
+                stack + [ vertex.getName() ],
                 result,
-                explored_roots
+                explored_subsets
             )
 
-            if len(stack) == 0:
-                explored_roots[vertex.getName()] = True
+            explored_subsets.append(stackToInt(graph, stack + [ vertex.getName() ]))
 
             if len(stack) >= len(result) - 1:
                 return
@@ -72,7 +85,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
     for component in components:
         dominating : List[str] = [ v.getName() for v in component.getVertices() ]
-        aux(component, [], dominating, { v.getName(): False for v in component.getVertices() })
+        aux(component, [], dominating, [])
         result += dominating
 
     return result
