@@ -55,19 +55,17 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
             )
 
             for name in [ v.getName() for v in remaining ]:
-                graph_ = graph.copy()
-                vertex = graph_.getVertexByName(name)
-                vertex.cover()
+                vertex = graph.getVertexByName(name)
+                modif = vertex.cover()
 
                 aux2(
-                    graph_,
+                    graph,
                     stack + [ vertex.getName() ],
                     result,
                     explored_roots
                 )
 
-                if len(stack) == 0:
-                    explored_roots[vertex.getName()] = True
+                graph.revert(modif)
 
                 if len(stack) >= len(result) - 1:
                     return

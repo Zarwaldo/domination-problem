@@ -21,8 +21,10 @@ class Vertex():
         self.neighboor_edges.append(edge)
 
 
-    def setMarked(self, bool : bool = True):
+    def setMarked(self, bool : bool = True) -> bool:
+        modified = (self.mark != bool)
         self.mark = bool
+        return modified
 
 
     def isMarked(self) -> bool:
@@ -30,9 +32,17 @@ class Vertex():
 
 
     def cover(self):
-        self.setMarked()
+        modif = []
+
+        if self.setMarked():
+            modif.append(self)
+
         for edge in self.neighboor_edges:
-            edge.opposite(self).setMarked()
+            n = edge.opposite(self)
+            if n.setMarked():
+                modif.append(n)
+
+        return modif
 
 
     def getNeighboorVertices(self):
@@ -85,6 +95,11 @@ class Graph():
 
     def getVertexByName(self, name : str) -> Vertex:
         return [ v for v in self.getVertices() if v.getName() == name ][0]
+
+
+    def revert(self, modif : List[Vertex]):
+        for v in modif:
+            v.setMarked(False)
 
 
     def copy(self):
