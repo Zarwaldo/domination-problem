@@ -12,7 +12,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
                 for c in unmarked_components:
                     if len(r) < maximum_stack_length and len(r) < len(result):
-                        r += aux(c, len(result) - len(stack))
+                        r += aux(c, min([maximum_stack_length, len(result)]) - len(r))
 
                 if len(r) < maximum_stack_length and len(r) < len(result):
                     result.clear()
@@ -35,7 +35,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 for v in stack:
                     result.append(v)
 
-            if len(stack) >= maximum_stack_length or len(stack) >= len(result) - 1:
+            if len(stack) >= maximum_stack_length - 1 or len(stack) >= len(result) - 1:
                 return
 
             remaining = [
@@ -66,7 +66,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
                 graph.revert(modif)
 
-                if len(stack) >= maximum_stack_length or len(stack) >= len(result) - 1:
+                if len(stack) >= maximum_stack_length - 1 or len(stack) >= len(result) - 1:
                     return
 
 
