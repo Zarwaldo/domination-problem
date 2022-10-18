@@ -4,25 +4,24 @@ from Graph import Graph, buildGraph
 
 
 def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List[str]:
-    def aux(graph : Graph):
+    def aux(graph : Graph, maximum_stack_length : int):
         def aux2(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
-            if len(graph.getVertices()) > 10:
-                unmarked_components = graph.getUnmarkedConnectedComponents()
-                if len(unmarked_components) > 1:
-                    r = stack
+            unmarked_components = graph.getUnmarkedConnectedComponents()
+            if len(unmarked_components) > 1:
+                r = stack
 
-                    for c in unmarked_components:
-                        if len(r) < len(result):
-                            r += aux(c)
+                for c in unmarked_components:
+                    if len(r) < maximum_stack_length and len(r) < len(result):
+                        r += aux(c, len(result) - len(stack))
 
-                    if len(r) < len(result):
-                        result.clear()
-                        for v in r:
-                            result.append(v)
+                if len(r) < maximum_stack_length and len(r) < len(result):
+                    result.clear()
+                    for v in r:
+                        result.append(v)
 
-                    return
+                return
 
-            if len(stack) >= len(result):
+            if len(stack) >= maximum_stack_length or len(stack) >= len(result):
                 return
 
             finished = True
@@ -36,7 +35,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 for v in stack:
                     result.append(v)
 
-            if len(stack) >= len(result) - 1:
+            if len(stack) >= maximum_stack_length or len(stack) >= len(result) - 1:
                 return
 
             remaining = [
@@ -67,7 +66,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
                 graph.revert(modif)
 
-                if len(stack) >= len(result) - 1:
+                if len(stack) >= maximum_stack_length or len(stack) >= len(result) - 1:
                     return
 
 
@@ -77,4 +76,4 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
         return dominating
 
     graph = buildGraph(vertices, edges)
-    return aux(graph)
+    return aux(graph, len(graph.getVertices()))
