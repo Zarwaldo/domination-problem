@@ -24,13 +24,13 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
             if len(stack) >= maximum_stack_length or len(stack) >= len(result):
                 return
 
-            finished = True
+            uncovered = len(graph.getVertices())
 
             for v in graph.getVertices():
-                if not v.isMarked():
-                    finished = False
+                if v.isMarked():
+                    uncovered -= 1
 
-            if finished:
+            if uncovered <= 0:
                 result.clear()
                 for v in stack:
                     result.append(v)
@@ -48,6 +48,13 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 if v.getName() not in stack
                 and v.getCoveringPotential() >= 1
             ]
+
+            if len(stack) + 1 in [maximum_stack_length - 1, len(result) - 1]:
+                remaining = [
+                    v
+                    for v in remaining
+                    if v.getCoveringPotential() >= uncovered
+                ]
 
             remaining.sort(
                 key = lambda v: -v.getCoveringPotential()
