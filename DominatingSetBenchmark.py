@@ -13,7 +13,7 @@ def randomGraph(n, m):
             v1 = vertices[random.randint(0, n-1)]
             v2 = vertices[random.randint(0, n-1)]
 
-            if (v1, v2) not in edges and (v2, v1) not in edges:
+            if (v1, v2) not in edges and (v2, v1) not in edges and v1 != v2:
                 edges.append((v1, v2))
                 break
 
