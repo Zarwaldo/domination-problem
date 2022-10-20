@@ -2,13 +2,22 @@
 from typing import List, Tuple, Dict, Optional
 from Graph import Graph, buildGraph
 
+t = 0
 
 def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List[str]:
     def aux(graph : Graph, maximum_stack_length : int):
+        global t
+        print('  ' * t + "SUBGRAPH ({}):".format(maximum_stack_length), [ v.getName() for v in graph.getVertices() ])
+
         def aux2(graph : Graph, stack : List[str], result : List[str], explored_roots : Dict[str, bool]):
+            global t
+
+            print('  ' * t + "STACK:", stack)
+
             unmarked_components = graph.getUnmarkedConnectedComponents()
             if len(unmarked_components) > 1:
                 r = stack
+                print('  ' * t + "COMPONENTS:", [ [ v.getName() for v in g.getVertices() ] for g in unmarked_components ])
 
                 for c in unmarked_components:
                     if len(r) < maximum_stack_length and len(r) < len(result):
@@ -18,6 +27,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                     result.clear()
                     for v in r:
                         result.append(v)
+                    print('  ' * t + "SOLUTION:", result)
 
                 return
 
@@ -34,6 +44,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 result.clear()
                 for v in stack:
                     result.append(v)
+                print('  ' * t + "SOLUTION:", result)
 
             if len(stack) >= maximum_stack_length - 1 or len(stack) >= len(result) - 1:
                 return
@@ -65,12 +76,14 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 vertex = graph.getVertexByName(name)
                 modif = vertex.cover()
 
+                t += 1
                 aux2(
                     graph,
                     stack + [ vertex.getName() ],
                     result,
                     explored_roots
                 )
+                t -= 1
 
                 graph.revert(modif)
 
@@ -82,7 +95,9 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
 
 
         dominating : List[str] = [ v.getName() for v in graph.getVertices() ]
+        t += 1
         aux2(graph, [], dominating, { v.getName(): False for v in graph.getVertices() })
+        t -= 1
 
         return dominating
 
