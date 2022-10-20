@@ -1,5 +1,5 @@
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from Graph import Graph, buildGraph
 
 
@@ -47,6 +47,7 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 )
                 if v.getName() not in stack
                 and v.getCoveringPotential() >= 1
+                and not explored_roots[v.getName()]
             ]
 
             if len(stack) + 1 in [maximum_stack_length - 1, len(result) - 1]:
@@ -72,6 +73,9 @@ def minimalDominatingSet(vertices : List[str], edges : List[Tuple[str]]) -> List
                 )
 
                 graph.revert(modif)
+
+                if len(stack) == 0:
+                    explored_roots[v.getName()] = True
 
                 if len(stack) >= maximum_stack_length - 1 or len(stack) >= len(result) - 1:
                     return
